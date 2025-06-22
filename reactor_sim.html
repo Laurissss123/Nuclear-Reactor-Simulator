@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Reactor Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* More modern font */
+            background-color: #121212; /* Darker background */
+            color: #eee; /* Lighter text */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffdb58; /* Gold title */
+            margin-bottom: 20px;
+            font-family: 'Press Start 2P', monospace; /* Retro font for title */
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.8); /* Glow effect */
+        }
+
+        #game-container {
+            display: flex;
+            justify-content: center;
+            width: 95%;
+            max-width: 1400px; /* Increased max-width */
+            margin-bottom: 20px;
+        }
+
+        #reactor-container {
+            width: 350px; /* Increased width */
+            padding: 25px; /* Increased padding */
+            background-color: #222; /* Darker container */
+            border: 1px solid #444; /* Darker border */
+            border-radius: 12px; /* More rounded corners */
+            text-align: center;
+            margin-right: 30px; /* Increased margin */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Shadow for depth */
+        }
+
+        #control-panel {
+            margin-top: 25px; /* Increased margin */
+            padding: 20px; /* Increased padding */
+            border: 1px solid #555; /* Darker border */
+            border-radius: 12px; /* More rounded corners */
+            background-color: #2a2a2a;
+        }
+
+        .control {
+            margin-bottom: 15px; /* Increased margin */
+            text-align: left;
+        }
+
+        .control label {
+            display: block;
+            margin-bottom: 8px; /* Increased margin */
+            color: #ddd;
+            font-weight: 500;
+        }
+
+        #display {
+            width: 350px; /* Increased width */
+            padding: 25px; /* Increased padding */
+            background-color: #222; /* Darker background */
+            border: 1px solid #444; /* Darker border */
+            border-radius: 12px; /* More rounded corners */
+            margin-right: 30px; /* Increased margin */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Shadow for depth */
+            color: #eee;
+        }
+
+        #display h2 {
+            color: #ff6f61; /* Reddish heading */
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        #upgrades-container {
+            width: 250px; /* Increased width */
+            padding: 25px; /* Increased padding */
+            background-color: #222; /* Darker background */
+            border: 1px solid #444; /* Darker border */
+            border-radius: 12px; /* More rounded corners */
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Shadow for depth */
+        }
+
+        #upgrades-container h2 {
+            color: #81c784; /* Greenish heading */
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        #upgrades-container button {
+            margin-bottom: 10px; /* Increased margin */
+            padding: 12px 16px; /* Increased padding */
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border: none;
+            border-radius: 8px; /* More rounded corners */
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease; /* Smooth transition */
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        #upgrades-container button:hover {
+            background-color: #45a049; /* Darker green */
+        }
+
+        #upgrades-container button:disabled {
+            background-color: #777;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 70px; /* Increased width */
+            height: 40px; /* Increased height */
+            margin-bottom: 15px; /* Increased margin */
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 20px; /* Fully rounded slider */
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 32px; /* Increased height */
+            width: 32px; /* Increased width */
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 50%; /* Make it round */
+        }
+
+        input:checked + .slider {
+            background-color: #00bcd4; /* Cyan */
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 2px #00bcd4;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(30px); /* Increased translate */
+            -ms-transform: translateX(30px);
+            transform: translateX(30px);
+        }
+
+        .red-button {
+            background-color: #e53935; /* Red */
+            color: white;
+            padding: 12px 16px; /* Increased padding */
+            border: none;
+            border-radius: 8px; /* More rounded corners */
+            cursor: pointer;
+            margin-bottom: 15px; /* Increased margin */
+            font-size: 1em;
+            transition: background-color 0.3s ease; /* Smooth transition */
+            font-family: 'Press Start 2P', monospace;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .red-button:hover {
+            background-color: #c62828; /* Darker red */
+        }
+
+        #events {
+            margin-top: 15px; /* Increased margin */
+            padding: 15px; /* Increased padding */
+            border: 1px solid #555; /* Darker border */
+            border-radius: 12px; /* More rounded corners */
+            text-align: left;
+            height: 150px; /* Increased height */
+            overflow-y: scroll;
+            background-color: #2a2a2a;
+            color: #ddd;
+            font-size: 0.9em;
+            font-family: 'Monospace', monospace;
+            line-height: 1.5;
+        }
+
+        #events p {
+            margin-bottom: 5px;
+        }
+
+        #settings-button {
+            position: absolute;
+            top: 20px; /* Increased top */
+            right: 20px; /* Increased right */
+            cursor: pointer;
+            font-size: 30px; /* Increased size */
+            color: #888;
+            transition: color 0.2s ease;
+        }
+
+        #settings-button:hover {
+            color: #eee;
+        }
+
+        #settings-button.active {
+            color: #00bcd4;
+        }
+
+        #dev-mode-controls {
+            position: absolute;
+            top: 70px; /* Increased top */
+            right: 20px; /* Increased right */
+            background-color: #2a2a2a;
+            padding: 20px; /* Increased padding */
+            border: 1px solid #555; /* Darker border */
+            border-radius: 12px; /* More rounded corners */
+            display: none;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        #dev-mode-controls label {
+            margin-bottom: 8px;
+            color: #ddd;
+            font-weight: 500;
+            display: block;
+            font-size: 0.9em;
+        }
+
+        #dev-mode-console {
+            position: absolute;
+            top: 130px; /* Increased top */
+            right: 20px; /* Increased right */
+            background-color: #2a2a2a;
+            padding: 20px; /* Increased padding */
+            border: 1px solid #555; /* Darker border */
+            border-radius: 12px; /* More rounded corners */
+            display: none;
+            width: 350px; /* Increased width */
+            height: 250px; /* Increased height */
+            overflow-y: scroll;
+            font-family: 'Monospace', monospace;
+            font-size: 0.9em;
+            color: #ddd;
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            line-height: 1.5;
+        }
+
+        #dev-mode-console input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #777;
+            border-radius: 5px;
+            background-color: #333;
+            color: #eee;
+            font-family: 'Monospace', monospace;
+            font-size: 0.9em;
+        }
+
+        #dev-mode-console input:focus {
+            outline: none;
+            border-color: #00bcd4;
+            box-shadow: 0 0 2px #00bcd4;
+        }
+
+        #dev-mode-output {
+            height: 180px;
+            overflow-y: scroll;
+            font-family: 'Monospace', monospace;
+            font-size: 0.9em;
+            color: #ddd;
+            line-height: 1.5;
+        }
+
+        #version-display {
+            position: fixed;
+            bottom: 15px; /* Increased bottom */
+            right: 15px; /* Increased right */
+            font-size: 0.8em; /* Smaller size */
+            color: #888;
+        }
+
+        /* Styles for sliders */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 5px;
+            background: #444;
+            outline: none;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00bcd4;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00bcd4;
+            cursor: pointer;
+        }
+
+        input[type="range"]:focus::-webkit-slider-thumb {
+            box-shadow: 0 0 2px rgba(0, 188, 212, 0.7);
+        }
+
+        input[type="range"]:focus::-moz-range-thumb {
+            box-shadow: 0 0 2px rgba(0, 188, 212, 0.7);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover,
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .control span {
+            color: #ddd;
+            font-size: 1em;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <h1>Nuclear Reactor Simulator</h1>
+    <div id="game-container">
+        <div id="reactor-container">
+            <label class="switch" aria-label="Toggle Reactor">
+                <input type="checkbox" id="reactor-key">
+                <span class="slider"></span>
+            </label>
+            <button id="toggleReactorBtn">Toggle Reactor Key</button>
+            <button id="scramReactorBtn" class="red-button">SCRAM</button>
+            <div id="control-panel">
+                <h2>Control Panel</h2>
+                <div class="control">
+                    <label for="control-rods-slider">Control Rods:</label>
+                    <input type="range" id="control-rods-slider" min="0" max="100" value="0">
+                    <span id="control-rods-value">0%</span>
+                </div>
+                <div class="control">
+                    <label for="cooling-slider">Cooling System:</label>
+                    <input type="range" id="cooling-slider" min="0" max="100" value="0">
+                    <span id="cooling-value">0%</span>
+                </div>
+                <div class="control">
+                    <label for="enrichment-slider">Fuel Enrichment:</label>
+                    <input type="range" id="enrichment-slider" min="1" max="5" value="1">
+                    <span id="enrichment-value">1x</span>
+                </div>
+            </div>
+        </div>
+        <div id="display">
+            <h2>Reactor Status</h2>
+            <p><strong>Status:</strong> <span id="status">Idle</span></p>
+            <p><strong>Temperature:</strong> <span id="temperature">25°C</span></p>
+            <p><strong>Power Output:</strong> <span id="power">0 MW</span></p>
+            <p><strong>Fuel Level:</strong> <span id="fuel">100%</span></p>
+            <p><strong>Waste Level:</strong> <span id="waste">0%</span></p>
+            <p><strong>Funds:</strong> <span id="funds">1000</span></p>
+            <hr>
+            <h2>Events</h2>
+            <div id="events">
+            </div>
+        </div>
+        <div id="upgrades-container">
+            <h2>Upgrades</h2>
+            <button id="upgrade-cooling">Upgrade Cooling ($750)</button>
+            <button id="upgrade-efficiency">Upgrade Efficiency ($1250)</button>
+            <button id="upgrade-casing">Upgrade Casing ($1000)</button>
+        </div>
+    </div>
+    <div id="settings-button">&#9881;</div>
+    <div id="dev-mode-controls">
+        <label class="switch" aria-label="Enable Developer Mode">
+            <input type="checkbox" id="dev-mode-key">
+            <span class="slider"></span>
+        </label>
+        <label for="dev-mode-key">Developer Mode</label>
+        <input type="password" id="dev-mode-password" placeholder="Enter Password">
+    </div>
+    <div id="dev-mode-console">
+        <input type="text" id="dev-mode-input" placeholder="Enter command...">
+        <div id="dev-mode-output"></div>
+    </div>
+    <div id="version-display">V1.6</div>
+    <script>
+        const reactorKey = document.getElementById('reactor-key');
+        const toggleReactorBtn = document.getElementById('toggleReactorBtn');
+        const scramReactorBtn = document.getElementById('scramReactorBtn');
+        const statusDisplay = document.getElementById('status');
+        const temperatureDisplay = document.getElementById('temperature');
+        const powerDisplay = document.getElementById('power');
+        const fuelDisplay = document.getElementById('fuel');
+        const wasteDisplay = document.getElementById('waste');
+        const fundsDisplay = document.getElementById('funds');
+        const controlRodsSlider = document.getElementById('control-rods-slider');
+        const controlRodsValue = document.getElementById('control-rods-value');
+        const coolingSlider = document.getElementById('cooling-slider');
+        const coolingValue = document.getElementById('cooling-value');
+        const enrichmentSlider = document.getElementById('enrichment-slider');
+        const enrichmentValue = document.getElementById('enrichment-value');
+        const eventsContainer = document.getElementById('events');
+        const settingsButton = document.getElementById('settings-button');
+        const devModeControls = document.getElementById('dev-mode-controls');
+        const devModeKey = document.getElementById('dev-mode-key');
+        const devModeConsole = document.getElementById('dev-mode-console');
+        const devModeInput = document.getElementById('dev-mode-input');
+        const devModeOutput = document.getElementById('dev-mode-output');
+        const devModePasswordInput = document.getElementById('dev-mode-password');
+        const versionDisplay = document.getElementById('version-display');
+
+        const upgradeCoolingButton = document.getElementById('upgrade-cooling');
+        const upgradeEfficiencyButton = document.getElementById('upgrade-efficiency');
+        const upgradeCasingButton = document.getElementById('upgrade-casing');
+
+        let reactorStatus = 'Idle';
+        let reactorTemperature = 25;
+        let powerOutput = 0;
+        let fuelLevel = 100;
+        let wasteLevel = 0;
+        let funds = 1000;
+        let controlRods = 0;
+        let cooling = 0;
+        let enrichment = 1;
+        let gameLoopInterval;
+        let coolingEfficiency = 1;
+        let efficiencyMultiplier = 1;
+        let casingLevel = 1;
+        let isDevModeEnabled = false;
+        let settingsOpen = false;
+
+        const correctPassword = "devmode.enable";
+
+        let coolingUpgradeCost = 750;
+        let efficiencyUpgradeCost = 1250;
+        let casingUpgradeCost = 1000;
+
+        const reactorHumSound = new Audio('sounds/reactor-hum.mp3');
+        const alarmSound = new Audio('sounds/alarm.mp3');
+        const buttonClickSound = new Audio('sounds/button-click.mp3');
+        const meltdownAlarmSound = new Audio('sounds/meltdown-alarm.mp3');
+
+        reactorHumSound.loop = true;
+
+        function playSound(sound) {
+            sound.currentTime = 0;
+            sound.play();
+        }
+
+        function updateDisplay() {
+            reactorStatus = getReactorStatus();
+            statusDisplay.textContent = reactorStatus;
+            temperatureDisplay.textContent = reactorTemperature.toFixed(1) + "°C";
+            powerDisplay.textContent = powerOutput.toFixed(1) + " MW";
+            fuelDisplay.textContent = fuelLevel.toFixed(1) + "%";
+            wasteDisplay.textContent = wasteLevel.toFixed(1) + "%";
+            fundsDisplay.textContent = funds.toFixed(2);
+            controlRodsValue.textContent = controlRods + "%";
+            coolingValue.textContent = cooling + "%";
+            enrichmentValue.textContent = enrichment + "x";
+
+            upgradeCoolingButton.textContent = `Upgrade Cooling ($${coolingUpgradeCost})`;
+            upgradeEfficiencyButton.textContent = `Upgrade Efficiency ($${efficiencyUpgradeCost})`;
+            upgradeCasingButton.textContent = `Upgrade Casing ($${casingUpgradeCost})`;
+
+            upgradeCoolingButton.disabled = funds < coolingUpgradeCost;
+            upgradeEfficiencyButton.disabled = funds < efficiencyUpgradeCost;
+            upgradeCasingButton.disabled = funds < casingUpgradeCost;
+        }
+
+        function startReactor() {
+            if (reactorStatus === 'Idle' && fuelLevel > 0) {
+                reactorStatus = 'Running';
+                gameLoopInterval = setInterval(gameLoop, 1000);
+                addEvent("Reactor started.");
+                playSound(buttonClickSound);
+                reactorHumSound.play();
+            }
+        }
+
+        function stopReactor() {
+            clearInterval(gameLoopInterval);
+            reactorStatus = 'Idle';
+            powerOutput = 0;
+            addEvent("Reactor stopped.");
+            playSound(buttonClickSound);
+            reactorHumSound.pause();
+            reactorHumSound.currentTime = 0;
+        }
+
+
+
+
+        function scramReactor() {
+            clearInterval(gameLoopInterval);
+            reactorStatus = 'Scrammed';
+            powerOutput = 0;
+            reactorTemperature = 25;
+            controlRods = 100;
+            updateControlRods();
+            addEvent("Reactor SCRAMMED!");
+            playSound(meltdownAlarmSound);
+            reactorHumSound.pause();
+            reactorKey.checked = false;
+            reactorHumSound.currentTime = 0;
+
+            setTimeout(resetGame, 2000);
+        }
+
+        function updateControlRods() {
+            controlRodsSlider.value = controlRods;
+            controlRodsValue.textContent = controlRods + "%";
+            playSound(buttonClickSound);
+        }
+
+        function addEvent(message) {
+            const event = document.createElement('p');
+            event.textContent = message;
+            eventsContainer.appendChild(event);
+            eventsContainer.scrollTop = eventsContainer.scrollHeight;
+            playSound(alarmSound);
+        }
+
+        function handleEvents() {
+            const randomEvent = Math.random();
+            if (randomEvent < 0.05 / casingLevel) {
+                const eventType = Math.random();
+                if (eventType < 0.3) {
+                    cooling -= 10;
+                    if (cooling < 0) cooling = 0;
+                    addEvent("Cooling system malfunction! Cooling reduced.");
+                } else if (eventType < 0.6) {
+                    powerOutput += 50;
+                    addEvent("Power surge! Power output increased temporarily.");
+                    setTimeout(() => {
+                        powerOutput -= 50;
+                        if (powerOutput < 0) powerOutput = 0;
+                    }, 5000);
+                } else {
+                    addEvent("Increased power demand! Temperature rising faster.");
+                    temperatureChange += 5;
+                    setTimeout(() => {
+                        temperatureChange -= 5;
+                    }, 10000);
+                }
+            }
+        }
+
+        let temperatureChange = 10;
+
+        function getReactorStatus() {
+            if (reactorTemperature < 300) {
+                return "Stable";
+            } else if (reactorTemperature < 700) {
+                return "Warning";
+            } else {
+                return "Critical";
+            }
+        }
+
+        function gameLoop() {
+            if (fuelLevel > 0) {
+                let temperatureChangeRate = (temperatureChange * enrichment) * (controlRods / 100) - ((cooling / 10) * coolingEfficiency);
+                reactorTemperature += temperatureChangeRate;
+                powerOutput = Math.max(0, (reactorTemperature - 100) * efficiencyMultiplier);
+                fuelLevel -= 0.05 * enrichment;
+                wasteLevel += 0.02 * enrichment;
+                funds += powerOutput * 0.1;
+                handleEvents();
+
+                console.log("Temperature Change Rate:", temperatureChangeRate);
+                console.log("Temperature:", reactorTemperature);
+                console.log("Power Output:", powerOutput);
+
+                if (reactorTemperature >= 1000 && !isDevModeEnabled) {
+                    addEvent("EMERGENCY SCRAM! Reactor temperature critical.");
+                    scramReactor();
+                } else if (wasteLevel >= 100) {
+                    stopReactor();
+                }
+            } else {
+                stopReactor();
+            }
+
+            updateDisplay();
+        }
+
+        toggleReactorBtn.addEventListener('click', () => {
+            if (reactorKey.checked) {
+                startReactor();
+            } else {
+                stopReactor();
+            }
+        });
+
+        scramReactorBtn.addEventListener('click', scramReactor);
+
+        controlRodsSlider.addEventListener('input', () => {
+            controlRods = parseInt(controlRodsSlider.value);
+            updateControlRods();
+        });
+
+        coolingSlider.addEventListener('input', () => {
+            cooling = parseInt(coolingSlider.value);
+            coolingValue.textContent = cooling + "%";
+            playSound(buttonClickSound);
+        });
+
+        enrichmentSlider.addEventListener('input', () => {
+            enrichment = parseInt(enrichmentSlider.value);
+            enrichmentValue.textContent = enrichment + "x";
+            playSound(buttonClickSound);
+        });
+
+        settingsButton.addEventListener('click', () => {
+            settingsOpen = !settingsOpen;
+            devModeControls.style.display = settingsOpen ? 'flex' : 'none';
+            settingsButton.classList.toggle('active', settingsOpen);
+        });
+
+        devModeKey.addEventListener('change', () => {
+            if (devModeKey.checked) {
+                if (devModePasswordInput.value === correctPassword) {
+                    isDevModeEnabled = true;
+                    devModeConsole.style.display = 'block';
+                    addEvent("Developer mode enabled. Use 'help' for commands.");
+                } else {
+                    devModeKey.checked = false;
+                    alert("Incorrect password for developer mode.");
+                }
+            } else {
+                isDevModeEnabled = false;
+                devModeConsole.style.display = 'none';
+                devModeOutput.innerHTML = '';
+                addEvent("Developer mode disabled.");
+            }
+            devModePasswordInput.value = '';
+        });
+
+        devModeInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                const command = devModeInput.value.trim();
+                devModeInput.value = '';
+                handleCommand(command);
+            }
+        });
+
+        function handleCommand(command) {
+            const parts = command.split(' ');
+            const action = parts[0].toLowerCase();
+            const parameter = parts[1]?.toLowerCase();
+            const value = parseFloat(parts[2]);
+
+            let message = `> ${command}<br>`;
+
+            if (!isDevModeEnabled) {
+                message += "Error: Developer mode is not enabled.";
+            } else {
+                switch (action) {
+                    case 'help':
+                        message += "Available commands:<br>";
+                        message += "set control.rods [value]<br>";
+                        message += "set cooling [value]<br>";
+                        message += "set enrichment [value]<br>";
+                        message += "set fuel [value]<br>";
+                        message += "set waste [value]<br>";
+                        message += "set funds [value]<br>";
+                        message += "get status<br>";
+                        message += "get temperature<br>";
+                        message += "get power<br>";
+                        message += "get fuel<br>";
+                        message += "get waste<br>";
+                        message += "get funds<br>";
+                        message += "start reactor<br>";
+                        message += "stop reactor<br>";
+                        message += "scram reactor<br>";
+                        break;
+                    case 'set':
+                        if (parts.length !== 3) {
+                            message += "Error: Invalid syntax. Use 'set [parameter] [value]'.";
+                            break;
+                        }
+                        if (isNaN(value)) {
+                            message += "Error: Value must be a number.";
+                            break;
+                        }
+                        switch (parameter) {
+                            case 'control.rods':
+                                controlRods = value;
+                                controlRodsSlider.value = value;
+                                updateControlRods();
+                                message += `Control rods set to ${value}%`;
+                                break;
+                            case 'cooling':
+                                cooling = value;
+                                coolingSlider.value = value;
+                                coolingValue.textContent = value + "%";
+                                message += `Cooling set to ${value}%`;
+                                break;
+                            case 'enrichment':
+                                enrichment = value;
+                                enrichmentSlider.value = value;
+                                enrichmentValue.textContent = value + "x";
+                                message += `Enrichment set to ${value}x`;
+                                break;
+                            case 'fuel':
+                                fuelLevel = value;
+                                message += `Fuel level set to ${value}%`;
+                                break;
+                            case 'waste':
+                                wasteLevel = value;
+                                message += `Waste level set to ${value}%`;
+                                break;
+                            case 'funds':
+                                funds = value;
+                                message += `Funds set to $${value}`;
+                                break;
+                            default:
+                                message += "Error: Invalid parameter.";
+                        }
+                        break;
+                    case 'get':
+                        if (parts.length !== 2) {
+                            message += "Error: Invalid syntax. Use 'get [parameter]'.";
+                            break;
+                        }
+                        switch (parameter) {
+                            case 'status':
+                                message += `Status: ${reactorStatus}`;
+                                break;
+                            case 'temperature':
+                                message += `Temperature: ${reactorTemperature.toFixed(1)}°C`;
+                                break;
+                            case 'power':
+                                message += `Power Output: ${powerOutput.toFixed(1)} MW`;
+                                break;
+                            case 'fuel':
+                                message += `Fuel Level: ${fuelLevel.toFixed(1)}%`;
+                                break;
+                            case 'waste':
+                                message += `Waste Level: ${wasteLevel.toFixed(1)}%`;
+                                break;
+                            case 'funds':
+                                message += `Funds: $${funds.toFixed(2)}`;
+                                break;
+                            default:
+                                message += "Error: Invalid parameter.";
+                        }
+                        break;
+                    case 'start':
+                        startReactor();
+                        message += "Reactor started.";
+                        break;
+                    case 'stop':
+                        stopReactor();
+                        message += "Reactor stopped.";
+                        break;
+                    case 'scram':
+                        scramReactor();
+                        message += "Reactor SCRAMMED!";
+                        break;
+                    default:
+                        message += "Error: Invalid command. Use 'help' for available commands.";
+                }
+            }
+            devModeOutput.innerHTML += message + "<br>";
+            devModeOutput.scrollTop = devModeOutput.scrollHeight;
+        }
+
+        upgradeCoolingButton.addEventListener('click', () => {
+            if (funds >= coolingUpgradeCost) {
+                funds -= coolingUpgradeCost;
+                coolingEfficiency += 0.1;
+                coolingUpgradeCost *= 1.5;
+                updateDisplay();
+                addEvent("Cooling system upgraded! Cooling efficiency increased.");
+            }
+        });
+
+        upgradeEfficiencyButton.addEventListener('click', () => {
+            if (funds >= efficiencyUpgradeCost) {
+                funds -= efficiencyUpgradeCost;
+                efficiencyMultiplier += 0.1;
+                efficiencyUpgradeCost *= 1.5;
+                updateDisplay();
+                addEvent("Reactor efficiency upgraded! Power output increased.");
+            }
+        });
+
+        upgradeCasingButton.addEventListener('click', () => {
+            if (funds >= casingUpgradeCost) {
+                funds -= casingUpgradeCost;
+                casingLevel += 1;
+                casingUpgradeCost *= 2;
+                updateDisplay();
+                addEvent("Reactor casing upgraded! Chance of events decreased.");
+            }
+        });
+
+        resetGame();
+    </script>
+</body>
+</html>
